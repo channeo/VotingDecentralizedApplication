@@ -15,6 +15,14 @@ pub struct Poll{
   pub candicate_amount:u64,
 }
 
+#[account]
+#[derive(InitSpace)]
+pub struct Candicate{
+  #[max_len(32)]
+  candicate_name:String,
+  candicate_votes:u64,
+}
+
 #[program]
 pub mod votingdapp {
     use super::*;
@@ -31,7 +39,62 @@ pub mod votingdapp {
       poll.candicate_amount = 0;
       Ok(())
     }
+    pub fn Initialize_candicate(ctx:Context<InitializeCandicate>,_candicate_name:String,_poll_id:u64)->Result<()>{
+      let candicate = &mut ctx.accounts.candicate;
+      let poll = &mut ctx.accounts.poll;
+      poll.candicate_amount +=1;
+      candicate.candicate_name = _candicate_name;
+      candicate.candicate_votes = 0;
+      Ok(())
+    }
+    pub fn votes(ctx:Context<Vote>,candicate_name:String,_poll_id:u64)->Result<()>{
+      let candicate = &mut ctx.accounts.candicate;
+      candicate.candicate_votes +=1;
+      msg!("Vote for candicate:{}",candicate.candicate_name);
+      msg!("Vote:{}",candicate.candicate_votes);
+      Ok(())
+    }
 }
+#[derive(Accounts)]
+#[instruction(candicate_name:String,poll_id:u64)]
+pub struct Vote<'info>{
+  pub signer:Signer<'info>,
+  #[account(
+    mut,
+    seeds = [poll_id.to_le_bytes().as_ref()],
+    bump
+  )]
+  pub poll:Account<'info,Poll>,
+  #[account(
+    seeds = [poll_id.to_le_bytes().as_ref(),candicate_name.as_bytes()],
+    bump
+  )]
+  pub candicate: Account<'info,Candicate>,
+  pub system_program: Program<'info,System>
+}
+
+#[derive(Accounts)]
+#[instruction(candicate_name:String,poll_id:u64)]
+pub struct InitializeCandicate<'info>{
+  #[account(mut)]
+  pub signer:Signer<'info>,
+  #[account(
+    seeds = [poll_id.to_le_bytes().as_ref()],
+    bump
+  )]
+  pub poll:Account<'info,Poll>,
+  #[account(
+    init,
+    payer=signer,
+    space = 8 + Candicate::INIT_SPACE,
+    seeds = [poll_id.to_le_bytes().as_ref(),candicate_name.as_bytes()],
+    bump
+  )]
+  pub candicate: Account<'info,Candicate>,
+  pub system_program: Program<'info,System>
+}
+
+
 #[derive(Accounts)]
 #[instruction(poll_id:u64)]
 pub struct InitializePoll<'info>{

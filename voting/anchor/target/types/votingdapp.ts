@@ -14,6 +14,67 @@ export type Votingdapp = {
   },
   "instructions": [
     {
+      "name": "initializeCandicate",
+      "discriminator": [
+        253,
+        209,
+        193,
+        124,
+        130,
+        30,
+        172,
+        214
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "poll",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "candicate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              },
+              {
+                "kind": "arg",
+                "path": "candicateName"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "candicateName",
+          "type": "string"
+        },
+        {
+          "name": "pollId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "initializePoll",
       "discriminator": [
         117,
@@ -66,9 +127,82 @@ export type Votingdapp = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "votes",
+      "discriminator": [
+        240,
+        48,
+        55,
+        88,
+        184,
+        169,
+        2,
+        213
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "poll",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "candicate",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              },
+              {
+                "kind": "arg",
+                "path": "candicateName"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "candicateName",
+          "type": "string"
+        },
+        {
+          "name": "pollId",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
+    {
+      "name": "candicate",
+      "discriminator": [
+        253,
+        122,
+        86,
+        201,
+        217,
+        81,
+        243,
+        224
+      ]
+    },
     {
       "name": "poll",
       "discriminator": [
@@ -84,6 +218,22 @@ export type Votingdapp = {
     }
   ],
   "types": [
+    {
+      "name": "candicate",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "candicateName",
+            "type": "string"
+          },
+          {
+            "name": "candicateVotes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
     {
       "name": "poll",
       "type": {
